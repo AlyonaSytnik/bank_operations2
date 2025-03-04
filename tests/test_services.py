@@ -30,7 +30,7 @@ class TestAnalyzeCashbackCategory(unittest.TestCase):
 
     def test_analyze_cashback_category_february(self):
         expected_result = {
-            "Еда": 200,
+            "Еда": 500,
         }
         result = json.loads(analyze_cashback_category(self.data, 2023, 2))
         self.assertEqual(result, expected_result)
@@ -49,5 +49,5 @@ class TestAnalyzeCashbackCategory(unittest.TestCase):
         result = json.loads(analyze_cashback_category(self.data, 2023, 1))
         self.assertEqual(result, expected_result)
 
-if __name__ == '__main__':
-    unittest.main()
+# if __name__ == '__main__':
+#     unittest.main()

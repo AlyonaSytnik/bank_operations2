@@ -60,7 +60,7 @@ def test_get_currency_rates(mocker):
     mocker.patch("builtins.open", mock.mock_open(read_data=json.dumps(mock_user_settings)))
 
     # Имитация вызова convert_to
-    mocker.patch("your_module_name.convert_to", side_effect=lambda cur: 75.5 if cur == "USD" else 90.0)
+    mocker.patch("src.utils.convert_to", side_effect=lambda cur: 75.5 if cur == "USD" else 90.0)
 
     result = get_currency_rates()
     assert result == [{"currency": "USD", "rate": 75.5}, {"currency": "EUR", "rate": 90.0}]
@@ -96,7 +96,7 @@ def test_get_stocks_prices(mocker):
     mock_user_settings = {"user_stocks": ["AAPL", "GOOGL"]}
     mocker.patch("builtins.open", mock.mock_open(read_data=json.dumps(mock_user_settings)))
 
-    mocker.patch("your_module_name.get_stock_price", side_effect=lambda stock: 100.0 if stock == "AAPL" else 1500.0)
+    mocker.patch("src.utils.get_stock_price", side_effect=lambda stock: 100.0 if stock == "AAPL" else 1500.0)
 
     result = get_stocks_prices()
     assert result == [{"stock": "AAPL", "price": 100.0}, {"stock": "GOOGL", "price": 1500.0}]
@@ -107,5 +107,5 @@ def test_get_stocks_prices(mocker):
     assert result == []
 
 
-if __name__ == "__main__":
-    pytest.main()
+# if __name__ == "__main__":
+#     pytest.main()

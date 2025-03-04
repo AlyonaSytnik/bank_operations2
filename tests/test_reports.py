@@ -55,5 +55,5 @@ class TestSpentFunction(unittest.TestCase):
             #mock_logger.error.any_call("Ошибка при записи отчета в файл: Unable to write file.")
 
 
-if __name__ == "__main__":
-    unittest.main()
+# if __name__ == "__main__":
+#     unittest.main()

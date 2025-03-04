@@ -1,127 +1,106 @@
 import pytest
 import datetime as dt
+from datetime import datetime
 from unittest import mock
+import json
+from json import dumps
+from unittest.mock import patch
 from src.views import get_cards_data, get_top_transactions, main
 
 
 def test_get_cards_data():
-    cards = [
-        {
-            "Номер карты": "1234 5678 9012 3456",
-            "Дата платежа": "15.01.2023",
-            "Сумма операции": "-500",
-        },
-        {
-            "Номер карты": "1234 5678 9012 3456",
-            "Дата платежа": "05.01.2023",
-            "Сумма операции": "-150",
-        },
-        {
-            "Номер карты": "1111 2222 3333 4444",
-            "Дата платежа": "15.01.2023",
-            "Сумма операции": "100",
-        },
-        {
-            "Номер карты": 1234567890123456,  # Неверный формат
-            "Дата платежа": "15.01.2023",
-            "Сумма операции": "-200",
-        },
+    today = datetime.now().strftime("%d.%m.%Y")  # Текущая дата в нужном формате
+    test_data = [
+        {"Номер карты": "1234567890123456", "Дата платежа": today, "Сумма операции": -500},
+        {"Номер карты": "1234567890123457", "Дата платежа": today, "Сумма операции": -300},
+        {"Номер карты": "1234567890123456", "Дата платежа": today, "Сумма операции": 100},  # Игнорируем положительные суммы
+        {"Номер карты": 1234567890123456, "Дата платежа": today, "Сумма операции": -200},  # Неверный формат номера карты
+        {"Номер карты": "1234567890123458", "Дата платежа": "01.01.2023", "Сумма операции": -100},  # Дата не совпадает
+        {"Номер карты": "1234567890123459", "Дата платежа": today, "Сумма операции": -400},
     ]
 
-    # Получаем сегодняшнюю дату
-    today = dt.date.today()
-
-    # Вызов функции с тестовыми данными
-    result = get_cards_data(cards)
-
-    # Проверяем, что возвращаемые данные соответствуют ожиданиям
     expected_result = [
-        {
-            "last_digits": "9012 3456",
-            "total_spent": "0.00",
-            "cashback": "0.00",
-        },
-        {
-            "last_digits": "3333 4444",
-            "total_spent": "0.00",
-            "cashback": "0.00",
-        },
+        {"last_digits": "3456", "total_spent": "500.00", "cashback": "5.00"},
+        {"last_digits": "3457", "total_spent": "300.00", "cashback": "3.00"},
+        {"last_digits": "3459", "total_spent": "400.00", "cashback": "4.00"},
     ]
 
+    result = get_cards_data(test_data)
+
+    # Проверяем, что результат соответствует ожиданиям
     assert result == expected_result
+
+def test_get_cards_data_empty():
+    # Проверка на пустые данные
+    result = get_cards_data([])
+    assert result == []
+
+def test_get_cards_data_invalid_date():
+    # Проверка на неправильный формат даты
+    test_data = [
+        {"Номер карты": "1234567890123456", "Дата платежа": "invalid date", "Сумма операции": -500},
+    ]
+
+    result = get_cards_data(test_data)
+    assert result == []
+
+def test_get_cards_data_short_card_number():
+    # Проверка на короткий номер карты
+    test_data = [
+        {"Номер карты": "123", "Дата платежа": datetime.now().strftime("%d.%m.%Y"), "Сумма операции": -500},
+    ]
+
+    result = get_cards_data(test_data)
+    assert result == []  # Ожидаем пустой результат, поскольку номер карты некорректен
+
+def test_get_cards_data_invalid_card_number_type():
+    # Проверка на неверный тип номера карты
+    test_data = [
+        {"Номер карты": 1234567890123456, "Дата платежа": datetime.now().strftime("%d.%m.%Y"), "Сумма операции": -500},
+    ]
+
+    result = get_cards_data(test_data)
+    assert result == []  # Ожидаем пустой результат, поскольку номер карты некорректен
 
 
 def test_get_top_transactions():
-    # Подготовка тестовых данных
-    transactions = [
-        {
-            "Дата платежа": "15.01.2023",
-            "Сумма платежа": "-500",
-            "Категория": "Еда",
-            "Описание": "Ужин в ресторане",
-        },
-        {
-            "Дата платежа": "15.01.2023",
-            "Сумма платежа": "-1500",
-            "Категория": "Покупки",
-            "Описание": "Покупка одежды",
-        },
-        {
-            "Дата платежа": "15.01.2023",
-            "Сумма платежа": "3000",
-            "Категория": "Зарплата",
-            "Описание": "Заработная плата",
-        },
-        {
-            "Дата платежа": "15.01.2023",
-            "Сумма платежа": "-1200",
-            "Категория": "Техника",
-            "Описание": "Покупка телефона",
-        },
+    # Задаем тестовые данные
+    test_data = [
+        {"Дата платежа": "2023-01-01", "Сумма платежа": 100, "Категория": "Food", "Описание": "Dinner"},
+        {"Дата платежа": "2023-01-02", "Сумма платежа": 200, "Категория": "Transport", "Описание": "Taxi"},
+        {"Дата платежа": "2023-01-03", "Сумма платежа": -300, "Категория": "Utilities", "Описание": "Electricity"},
+        {"Дата платежа": "2023-01-04", "Сумма платежа": 400, "Категория": "Health", "Описание": "Gym"},
+        {"Дата платежа": "2023-01-05", "Сумма платежа": 500, "Категория": "Shopping", "Описание": "Mall"},
+        {"Дата платежа": "2023-01-06", "Сумма платежа": 50, "Категория": "Fun", "Описание": "Cinema"},
+    ]
+
+    expected_result = [
+        {"date": "2023-01-05", "amount": 500, "category": "Shopping", "description": "Mall"},
+        {"date": "2023-01-04", "amount": 400, "category": "Health", "description": "Gym"},
+        {"date": "2023-01-03", "amount": -300, "category": "Utilities", "description": "Electricity"},
+        {"date": "2023-01-02", "amount": 200, "category": "Transport", "description": "Taxi"},
+        {"date": "2023-01-01", "amount": 100, "category": "Food", "description": "Dinner"},
     ]
 
     # Вызов функции
-    result = get_top_transactions(transactions)
+    result = get_top_transactions(test_data)
 
-    # Ожидаемый результат
-    expected_result = [
-        {
-            "date": "15.01.2023",
-            "amount": "-1500",
-            "category": "Покупки",
-            "description": "Покупка одежды",
-        },
-        {
-            "date": "15.01.2023",
-            "amount": "-1200",
-            "category": "Техника",
-            "description": "Покупка телефона",
-        },
-        {
-            "date": "15.01.2023",
-            "amount": "-500",
-            "category": "Еда",
-            "description": "Ужин в ресторане",
-        },
-        {
-            "date": "15.01.2023",
-            "amount": "3000",
-            "category": "Зарплата",
-            "description": "Заработная плата",
-        },
-    ]
+    # Проверка результата
+    assert result == expected_result[:5]
 
-    assert result == expected_result[:5]  # Проверяем только 5 лучших транзакций
+def test_get_top_transactions_empty():
+    # Проверка на пустые данные
+    result = get_top_transactions([])
+    assert result == []
 
 
-@mock.patch('your_module_name.read_operations_xlsx')
-@mock.patch('your_module_name.greeting')
-@mock.patch('your_module_name.get_cards_data')
-@mock.patch('your_module_name.get_top_transactions')
-@mock.patch('your_module_name.get_currency_rates')
-@mock.patch('your_module_name.get_stocks_prices')
-@mock.patch('json.dumps')
-def test_main(mock_dumps, mock_get_stocks_prices, mock_get_currency_rates, mock_get_top_transactions,
+@mock.patch('src.views.read_operations_xlsx')
+@mock.patch('src.views.greeting')
+@mock.patch('src.views.get_cards_data')
+@mock.patch('src.views.get_top_transactions')
+@mock.patch('src.views.get_currency_rates')
+@mock.patch('src.views.get_stocks_prices')
+def test_main(mock_get_stocks_prices, mock_get_currency_rates, mock_get_top_transactions,
               mock_get_cards_data, mock_greeting, mock_read_operations_xlsx):
     # Подготавливаем данные
     mock_read_operations_xlsx.return_value = [{}]  # Как пример, файл операций возвращает пустой словарь
@@ -146,10 +125,9 @@ def test_main(mock_dumps, mock_get_stocks_prices, mock_get_currency_rates, mock_
         "stock_prices": [],
     }
 
-    mock_dumps.assert_called_once_with(expected_result, ensure_ascii=False, indent=4)
-
+    # Проверяем, что результат соответствует ожидаемому результату
     assert json.loads(result) == expected_result
 
 
-if __name__ == "__main__":
-    pytest.main()
+# if __name__ == "__main__":
+#     pytest.main()

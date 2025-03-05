@@ -3,8 +3,7 @@ import json
 import logging
 from pathlib import Path
 
-from utils import read_operations_xlsx
-
+from src.utils import read_operations_xlsx
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -12,17 +11,21 @@ logger = logging.getLogger(__name__)
 
 def analyze_cashback_category(data, year, month):
     try:
-        transactions = list(
-            filter(
-                lambda x: dt.datetime.strptime(
-                    x["Дата платежа"], "%d.%m.%Y"
-                ).year
-                == year
-                and dt.datetime.strptime(x["Дата платежа"], "%d.%m.%Y").month
-                == month,
-                filter(lambda x: type(x["Дата платежа"]) == str, data),
-            )
-        )
+        transactions = []
+
+        for item in data:
+            # Убедимся, что "Дата платежа" - строка
+            if isinstance(item["Дата платежа"], str):
+                try:
+                    # Пробуем разобрать дату
+                    transaction_date = dt.datetime.strptime(item["Дата платежа"], "%d.%m.%Y")
+
+                    # Проверяем год и месяц
+                    if transaction_date.year == year and transaction_date.month == month:
+                        transactions.append(item)
+                except ValueError:
+                    # Логируем предупреждение о некорректной дате
+                    logger.warning(f"Неверный формат даты: {item['Дата платежа']}, транзакция пропущена.")
 
         categories = {}
         for transaction in transactions:
@@ -31,9 +34,8 @@ def analyze_cashback_category(data, year, month):
             if category and cashback:
                 categories[category] = categories.get(category, 0) + cashback
 
-        sorted_categories = dict(
-            sorted(categories.items(), key=lambda item: item[1], reverse=True)
-        )
+        # Сортируем категории по кэшбэку
+        sorted_categories = dict(sorted(categories.items(), key=lambda item: item[1], reverse=True))
         return json.dumps(sorted_categories, ensure_ascii=False, indent=4)
 
     except Exception as e:

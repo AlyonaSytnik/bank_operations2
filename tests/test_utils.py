@@ -1,26 +1,40 @@
-import pytest
-import requests
-import pandas as pd
+import datetime as dt
 import json
 from unittest import mock
-import datetime as dt
-from src.utils import greeting, read_operations_xlsx, convert_to, get_currency_rates, get_stocks_prices, get_stock_price
+
+import pandas as pd
+import pytest
+import requests
+
+from src.utils import (
+    convert_to,
+    get_currency_rates,
+    get_stock_price,
+    get_stocks_prices,
+    greeting,
+    read_operations_xlsx,
+)
+
 
 def test_morning():
     assert greeting(dt.datetime(2023, 1, 1, 6, 0)) == "Доброе утро"
     assert greeting(dt.datetime(2023, 1, 1, 11, 59)) == "Доброе утро"
 
+
 def test_day():
     assert greeting(dt.datetime(2023, 1, 1, 12, 0)) == "Добрый день"
     assert greeting(dt.datetime(2023, 1, 1, 16, 59)) == "Добрый день"
+
 
 def test_evening():
     assert greeting(dt.datetime(2023, 1, 1, 17, 0)) == "Добрый вечер"
     assert greeting(dt.datetime(2023, 1, 1, 21, 59)) == "Добрый вечер"
 
+
 def test_night():
     assert greeting(dt.datetime(2023, 1, 1, 22, 0)) == "Доброй ночи"
     assert greeting(dt.datetime(2023, 1, 1, 4, 59)) == "Доброй ночи"
+
 
 def test_read_operations_xlsx(mocker):
     # Тест доступного файла

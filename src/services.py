@@ -5,7 +5,6 @@ from pathlib import Path
 
 from src.utils import read_operations_xlsx
 
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -36,9 +35,7 @@ def analyze_cashback_category(data, year, month):
                 categories[category] = categories.get(category, 0) + cashback
 
         # Сортируем категории по кэшбэку
-        sorted_categories = dict(
-            sorted(categories.items(), key=lambda item: item[1], reverse=True)
-        )
+        sorted_categories = dict(sorted(categories.items(), key=lambda item: item[1], reverse=True))
         return json.dumps(sorted_categories, ensure_ascii=False, indent=4)
 
     except Exception as e:

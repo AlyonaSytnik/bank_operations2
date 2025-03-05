@@ -4,12 +4,11 @@ from json import dumps
 from pathlib import Path
 
 from src.utils import (
-    greeting,
-    read_operations_xlsx,
     get_currency_rates,
     get_stocks_prices,
+    greeting,
+    read_operations_xlsx,
 )
-
 
 BASE_DIR = Path(__file__).parent
 OPERATIONS_PATH = BASE_DIR.parent / "data" / "operations.xlsx"
@@ -36,11 +35,13 @@ def get_cards_data(cards):
                 insert_cards[card_number] = insert_cards.get(card_number, 0) + abs(card_spent)
 
     for card_number, spent in insert_cards.items():
-        result.append({
-            "last_digits": card_number,
-            "total_spent": f"{spent:.2f}",
-            "cashback": f"{(spent / 100):.2f}",
-        })
+        result.append(
+            {
+                "last_digits": card_number,
+                "total_spent": f"{spent:.2f}",
+                "cashback": f"{(spent / 100):.2f}",
+            }
+        )
 
     return result
 

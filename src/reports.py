@@ -1,9 +1,9 @@
+import datetime as dt
 import json
 import logging
-import datetime as dt
 from functools import wraps
-import pandas as pd
 
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,9 +17,7 @@ def report(default_filename: str = "report.json"):
             filename = kwargs.get("filename", default_filename)
             try:
                 if isinstance(result, pd.DataFrame):
-                    result.to_json(
-                        filename, orient="records", force_ascii=False
-                    )
+                    result.to_json(filename, orient="records", force_ascii=False)
                 else:
                     with open(filename, "w") as f:
                         json.dump(result, f, ensure_ascii=False, indent=4)

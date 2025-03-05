@@ -1,10 +1,10 @@
-import unittest
-import json
 import datetime as dt
-
-from src.utils import read_operations_xlsx
+import json
+import unittest
 
 from src.services import analyze_cashback_category
+from src.utils import read_operations_xlsx
+
 
 class TestAnalyzeCashbackCategory(unittest.TestCase):
 
@@ -16,8 +16,12 @@ class TestAnalyzeCashbackCategory(unittest.TestCase):
             {"Дата платежа": "10.01.2023", "Категория": "Техника", "Кэшбэк": 50},
             {"Дата платежа": "05.01.2023", "Категория": "Одежда", "Кэшбэк": 70},
             {"Дата платежа": "01.01.2023", "Категория": "Еда", "Кэшбэк": 200},
-            {"Дата платежа": "28.02.2023", "Категория": "Еда", "Кэшбэк": 300},  # Эта дата не будет учитывать Январь
-                    ]
+            {
+                "Дата платежа": "28.02.2023",
+                "Категория": "Еда",
+                "Кэшбэк": 300,
+            },  # Эта дата не будет учитывать Январь
+        ]
 
     def test_analyze_cashback_category_january(self):
         expected_result = {
@@ -48,6 +52,7 @@ class TestAnalyzeCashbackCategory(unittest.TestCase):
         }
         result = json.loads(analyze_cashback_category(self.data, 2023, 1))
         self.assertEqual(result, expected_result)
+
 
 # if __name__ == '__main__':
 #     unittest.main()

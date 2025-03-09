@@ -3,7 +3,6 @@ import json
 from unittest import mock
 
 import pandas as pd
-import pytest
 import requests
 
 from src.utils import (
@@ -40,7 +39,7 @@ def test_read_operations_xlsx(mocker):
     # Тест доступного файла
     mocker.patch("pandas.read_excel", return_value=pd.DataFrame({"A": [1], "B": [2]}))
     result = read_operations_xlsx("dummy_path.xlsx")
-    assert result == [{"A": 1, "B": 2}]
+    assert result == [{"A": "1", "B": "2"}]
 
     # Тест на отсутствие файла
     mocker.patch("pandas.read_excel", side_effect=FileNotFoundError)

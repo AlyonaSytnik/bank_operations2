@@ -1,9 +1,7 @@
-import datetime as dt
 import json
 import unittest
 
 from src.services import analyze_cashback_category
-from src.utils import read_operations_xlsx
 
 
 class TestAnalyzeCashbackCategory(unittest.TestCase):

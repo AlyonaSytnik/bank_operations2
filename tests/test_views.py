@@ -1,17 +1,13 @@
 import datetime as dt
 import json
 from datetime import datetime
-from json import dumps
 from unittest import mock
-from unittest.mock import patch
-
-import pytest
 
 from src.views import get_cards_data, get_top_transactions, main
 
 
 def test_get_cards_data():
-    today = datetime.now().strftime("%d.%m.%Y")  # Текущая дата в нужном формате
+    today = datetime.now().strftime("%d.%m.%Y %H:%M:%S")  # Текущая дата в нужном формате
     test_data = [
         {"Номер карты": "1234567890123456", "Дата платежа": today, "Сумма операции": -500},
         {"Номер карты": "1234567890123457", "Дата платежа": today, "Сумма операции": -300},
